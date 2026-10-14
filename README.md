@@ -6,6 +6,14 @@
 
 ---
 
+🌐 Live Demo & Interactive Web Application
+🐙 GitHub Repository: [https://github.com/wilber830915/AIoT-DIC2-MultipleLR](https://github.com/wilber830915/AIoT-DIC2-MultipleLR)
+🔗 Live Demo: [https://wilber830915.github.io/AIoT-DIC2-MultipleLR/](https://wilber830915.github.io/AIoT-DIC2-MultipleLR/)
+
+![50 Startups 多元線性迴歸與特徵選擇探索器 網頁截圖](wilber830915.github.io_AIoT-DIC2-MultipleLR.png)
+
+---
+
 ## 目錄
 
 - [專案簡介](#專案簡介)
