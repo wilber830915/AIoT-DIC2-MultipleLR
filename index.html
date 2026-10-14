@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>50 Startups：多元線性迴歸與特徵選擇探索器</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="model_data.js"></script>
+
+  <style>
+    :root {
+      --bg: #070b16;
+      --bg-soft: #0b1220;
+      --surface: #101a2e;
+      --surface-2: #16233c;
+      --surface-hover: #1b2b49;
+      --border: #1f3054;
+      --border-soft: #18233a;
+      --text: #e6edf7;
+      --text-muted: #93a4c0;
+      --text-dim: #64748b;
+
+      --primary: #6366f1;
+      --primary-light: #818cf8;
+      --primary-dark: #4338ca;
+      --primary-subtle: rgba(99, 102, 241, .14);
+
+      --emerald: #34d399;
+      --emerald-subtle: rgba(52, 211, 153, .12);
+      --amber: #fbbf24;
+      --amber-subtle: rgba(251, 191, 36, .12);
+      --rose: #fb7185;
+
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 20px;
+      --shadow-sm: 0 1px 3px 0 rgba(0,0,0,.4);
+      --shadow-md: 0 8px 20px -6px rgba(0,0,0,.55);
+      --shadow-lg: 0 20px 45px -12px rgba(0,0,0,.65);
+      --glow: 0 0 24px rgba(99,102,241,.35);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background:
+        radial-gradient(1100px 600px at 85% -10%, rgba(99,102,241,.16), transparent 60%),
+        radial-gradient(900px 500px at -10% 10%, rgba(52,211,153,.08), transparent 55%),
+        var(--bg);
+      background-attachment: fixed;
+      color: var(--text);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+
+    h1, h2, h3, h4, .font-heading { font-family: 'Outfit', sans-serif; font-weight: 700; color: #f2f6ff; }
+
+    .container { max-width: 1380px; margin: 0 auto; padding: 24px 20px 70px; }
+
+    .top-header {
+      background: rgba(9, 14, 26, .82);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 0; position: sticky; top: 0; z-index: 100;
+    }
+    .header-inner {
+      max-width: 1380px; margin: 0 auto; padding: 0 20px;
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;
+    }
+    .breadcrumbs { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-dim); margin-bottom: 4px; }
+    .breadcrumbs a { color: var(--text-dim); text-decoration: none; transition: color .15s; }
+    .breadcrumbs a:hover { color: var(--primary-light); }
+    .header-title-group h1 { font-size: 23px; letter-spacing: -.02em; color: #f2f6ff; display: flex; align-items: center; gap: 10px; }
+    .brand-badge {
+      background: linear-gradient(135deg, var(--primary-dark), var(--primary-light));
+      color: white; font-size: 11px; font-weight: 700; padding: 3px 9px;
+      border-radius: 9999px; letter-spacing: .04em; text-transform: uppercase;
+      box-shadow: var(--glow);
+    }
+    .ref-btn {
+      display: inline-flex; align-items: center; gap: 8px; background: var(--surface-2);
+      color: var(--text); border: 1px solid var(--border); padding: 8px 14px;
+      border-radius: var(--radius-md); font-size: 13px; font-weight: 600; text-decoration: none; transition: all .2s;
+    }
+    .ref-btn:hover { background: var(--surface-hover); border-color: var(--primary-light); color: var(--primary-light); box-shadow: var(--glow); }
+
+    .hero-card {
+      background:
+        radial-gradient(600px 260px at 90% 0%, rgba(99,102,241,.35), transparent 60%),
+        linear-gradient(135deg, #101a3d 0%, #101c3a 45%, #0b1428 100%);
+      border: 1px solid var(--border);
+      color: white; border-radius: var(--radius-xl); padding: 38px 40px; margin-bottom: 28px;
+      box-shadow: var(--shadow-lg); position: relative; overflow: hidden;
+    }
+    .hero-card::after {
+      content: ''; position: absolute; top: -70px; right: -70px; width: 340px; height: 340px;
+      background: radial-gradient(circle, rgba(129,140,248,.28) 0%, transparent 70%); pointer-events: none;
+    }
+    .hero-card h2 { font-size: 31px; color: white; margin-bottom: 12px; line-height: 1.25; }
+    .hero-card p { font-size: 15px; color: #aab8d8; max-width: 860px; line-height: 1.65; }
+    .hero-card strong { color: #cdd6f4; }
+    .hero-tags { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 22px; }
+    .hero-pill {
+      background: rgba(255,255,255,.06); backdrop-filter: blur(8px);
+      border: 1px solid rgba(129,140,248,.28); color: #cbd5f5; font-size: 12px; font-weight: 500;
+      padding: 6px 13px; border-radius: 9999px; display: flex; align-items: center; gap: 6px;
+    }
+
+    .card {
+      background: linear-gradient(180deg, var(--surface), var(--bg-soft));
+      border-radius: var(--radius-lg); border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm); padding: 24px; transition: box-shadow .25s, border-color .25s, transform .25s;
+    }
+    .card:hover { box-shadow: var(--shadow-md); border-color: #2b3f68; transform: translateY(-2px); }
+    .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+    .card-title-group h3 { font-size: 18px; color: #eef3ff; display: flex; align-items: center; gap: 8px; }
+    .card-subtitle { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+
+    .controls-wrapper {
+      background: linear-gradient(180deg, var(--surface), var(--bg-soft));
+      border-radius: var(--radius-lg); border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm); padding: 20px 24px; margin-bottom: 24px;
+    }
+    .control-label {
+      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
+      color: var(--text-dim); margin-bottom: 10px; display: block;
+    }
+    .tabs-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+    .tab-btn {
+      padding: 10px 16px; background: var(--surface-2); border: 1px solid var(--border);
+      border-radius: var(--radius-md); font-size: 13px; font-weight: 600; color: var(--text-muted);
+      cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: all .2s;
+    }
+    .tab-btn:hover { background: var(--surface-hover); border-color: var(--primary); color: var(--primary-light); }
+    .tab-btn.active {
+      background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+      border-color: var(--primary-light); color: white; box-shadow: var(--glow);
+    }
+    .tab-btn .badge-pill { font-size: 10px; padding: 2px 7px; border-radius: 9999px; background: rgba(255,255,255,.08); color: var(--text-muted); }
+    .tab-btn.active .badge-pill { background: rgba(255,255,255,.22); color: white; }
+
+    .k-selector-group { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .k-btn {
+      padding: 9px 16px; border: 1px solid var(--border); background: var(--surface-2);
+      border-radius: var(--radius-md); font-size: 13px; font-weight: 600; color: var(--text-muted);
+      cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: all .2s;
+    }
+    .k-btn:hover { border-color: var(--primary); color: var(--primary-light); }
+    .k-btn.active {
+      background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+      border-color: var(--primary-light); color: white; box-shadow: var(--glow);
+    }
+    .k-btn.sweet-spot { border-color: var(--emerald); color: var(--emerald); background: var(--emerald-subtle); }
+    .k-btn.sweet-spot.active { background: linear-gradient(135deg, #059669, var(--emerald)); border-color: var(--emerald); color: #04231a; box-shadow: 0 0 22px rgba(52,211,153,.35); }
+    .k-btn.overfitting { border-color: rgba(251,191,36,.5); color: var(--amber); }
+    .k-btn.overfitting.active { background: linear-gradient(135deg, #b45309, var(--amber)); border-color: var(--amber); color: #2b1a00; box-shadow: 0 0 22px rgba(251,191,36,.35); }
+
+    .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .metric-card {
+      background: linear-gradient(180deg, var(--surface), var(--bg-soft));
+      border-radius: var(--radius-lg); border: 1px solid var(--border);
+      padding: 20px; position: relative; overflow: hidden; box-shadow: var(--shadow-sm); transition: all .25s;
+    }
+    .metric-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: #2b3f68; }
+    .metric-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, var(--primary-dark), var(--primary-light)); }
+    .metric-card.sweet::before { background: linear-gradient(90deg, #059669, var(--emerald)); }
+    .metric-card.alert::before { background: linear-gradient(90deg, #b45309, var(--amber)); }
+    .metric-title { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+    .metric-val { font-size: 27px; font-family: 'Outfit', sans-serif; font-weight: 700; color: #f2f6ff; line-height: 1.1; margin-bottom: 6px; }
+    .metric-note { font-size: 12px; color: var(--text-dim); display: flex; align-items: center; gap: 4px; }
+
+    .badge-tag { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 9999px; display: inline-flex; align-items: center; gap: 4px; }
+    .badge-green { background: var(--emerald-subtle); color: var(--emerald); border: 1px solid rgba(52,211,153,.35); }
+    .badge-blue { background: var(--primary-subtle); color: var(--primary-light); border: 1px solid rgba(99,102,241,.4); }
+    .badge-amber { background: var(--amber-subtle); color: var(--amber); border: 1px solid rgba(251,191,36,.35); }
+
+    .dual-charts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(480px, 1fr)); gap: 24px; margin-bottom: 24px; }
+    .chart-container { position: relative; height: 340px; width: 100%; }
+
+    .equation-card {
+      background: linear-gradient(to right, rgba(99,102,241,.08), rgba(52,211,153,.04));
+      border: 1px solid rgba(99,102,241,.3);
+      border-left: 5px solid var(--primary-light); border-radius: var(--radius-md); padding: 20px 24px; margin-bottom: 24px;
+    }
+    .equation-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--primary-light); margin-bottom: 10px; }
+    .equation-formula {
+      font-family: 'Fira Code', monospace; font-size: 15px; color: #eaf1ff; line-height: 1.9;
+      word-break: break-word; background: rgba(7,11,22,.6); padding: 16px 18px; border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .eq-intercept { color: #a5b4fc; font-weight: 600; }
+    .eq-var { color: #7dd3fc; font-weight: 600; }
+    .eq-pos { color: var(--emerald); font-weight: 600; }
+    .eq-neg { color: var(--rose); font-weight: 600; }
+
+    .table-responsive { overflow-x: auto; border-radius: var(--radius-md); border: 1px solid var(--border); }
+    table.data-table { width: 100%; border-collapse: collapse; font-size: 13.5px; text-align: left; }
+    table.data-table thead { background: rgba(22,35,60,.9); border-bottom: 1px solid var(--border); }
+    table.data-table th { padding: 12px 16px; font-weight: 600; color: var(--text-muted); font-size: 12px; text-transform: uppercase; letter-spacing: .03em; }
+    table.data-table td { padding: 13px 16px; border-bottom: 1px solid var(--border-soft); color: #cbd6e8; }
+    table.data-table tbody tr:last-child td { border-bottom: none; }
+    table.data-table tbody tr:hover { background: rgba(99,102,241,.07); }
+
+    .feature-chip { background: var(--primary-subtle); color: var(--primary-light); font-weight: 600; padding: 3px 10px; border-radius: 6px; font-size: 12px; display: inline-block; border: 1px solid rgba(99,102,241,.3); }
+
+    .calc-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 24px; }
+    @media (max-width: 900px) { .calc-grid { grid-template-columns: 1fr; } }
+
+    .input-group { margin-bottom: 16px; }
+    .input-label-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 13px; font-weight: 600; color: #cbd6e8; }
+    .input-field {
+      width: 100%; padding: 10px 14px; background: rgba(7,11,22,.6); border: 1px solid var(--border); border-radius: var(--radius-md);
+      font-size: 14px; font-family: inherit; color: var(--text); transition: all .15s;
+    }
+    .input-field::placeholder { color: var(--text-dim); }
+    .input-field:focus { outline: none; border-color: var(--primary-light); box-shadow: 0 0 0 3px rgba(99,102,241,.22); }
+    select.input-field option { background: var(--surface); color: var(--text); }
+    .range-slider { width: 100%; margin-top: 6px; accent-color: var(--primary-light); }
+    .input-group.disabled { opacity: .35; pointer-events: none; filter: grayscale(0.4); }
+
+    .prediction-output-box {
+      background:
+        radial-gradient(300px 160px at 90% 0%, rgba(52,211,153,.28), transparent 65%),
+        linear-gradient(135deg, #14224a 0%, #0b1428 100%);
+      border: 1px solid var(--border);
+      color: white; border-radius: var(--radius-lg); padding: 30px; display: flex; flex-direction: column;
+      justify-content: center; align-items: center; text-align: center; box-shadow: var(--shadow-md);
+      position: relative; overflow: hidden;
+    }
+    .pred-label { font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: #a9b8dd; margin-bottom: 10px; }
+    .pred-value { font-size: 36px; font-family: 'Outfit', sans-serif; font-weight: 800; color: var(--emerald); margin-bottom: 12px; letter-spacing: -.02em; text-shadow: 0 0 24px rgba(52,211,153,.35); }
+    .pred-formula-note { font-size: 12px; color: #8fa2c9; line-height: 1.5; }
+
+    .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+    .dot-green { background: var(--emerald); box-shadow: 0 0 8px var(--emerald); }
+    .dot-amber { background: var(--amber); box-shadow: 0 0 8px var(--amber); }
+
+    footer { margin-top: 54px; background: rgba(9,14,26,.7); border-top: 1px solid var(--border); padding: 36px 0; color: var(--text-muted); font-size: 13.5px; }
+    .footer-inner { max-width: 1380px; margin: 0 auto; padding: 0 20px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 24px; }
+    .ack-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px 20px; margin-top: 16px; line-height: 1.7; }
+    .ack-card a { color: var(--primary-light); text-decoration: none; font-weight: 500; border-bottom: 1px solid rgba(99,102,241,.4); }
+    .ack-card a:hover { color: #a5b4fc; }
+    .ack-card code { font-family: 'Fira Code', monospace; background: rgba(99,102,241,.12); padding: 1px 6px; border-radius: 5px; color: #c7d2fe; font-size: 12px; }
+
+    @media (max-width: 768px) {
+      .dual-charts-grid { grid-template-columns: 1fr; }
+      .hero-card { padding: 24px; }
+      .hero-card h2 { font-size: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="top-header">
+    <div class="header-inner">
+      <div>
+        <div class="breadcrumbs">
+          <a href="#"><i class="fa-solid fa-house"></i> Home</a>
+          <i class="fa-solid fa-chevron-right" style="font-size:10px;"></i>
+          <a href="#">Regression Analysis</a>
+          <i class="fa-solid fa-chevron-right" style="font-size:10px;"></i>
+          <span style="color:#cbd6e8;font-weight:600;">50 Startups Feature Selection</span>
+        </div>
+        <div class="header-title-group">
+          <h1>
+            <i class="fa-solid fa-chart-line" style="color:var(--primary-light);"></i>
+            50 Startups 多元線性迴歸與特徵選擇探索器
+            <span class="brand-badge">CRISP-DM</span>
+          </h1>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <div class="hero-card">
+      <h2>特徵選擇與精簡模型分析</h2>
+      <p>
+        比較 5 種特徵選擇方法（<strong>Forward Selection</strong>、<strong>Backward Elimination</strong>、
+        <strong>Lasso (L1)</strong>、<strong>Random Forest Importance</strong>、<strong>Mutual Information</strong>），
+        探索特徵數 <strong>k = 1…5</strong> 的偏差—變異權衡，動態找出各方法的
+        <strong>最佳精簡組合（最小測試 RMSE）</strong>與<strong>過擬合轉折點</strong>。
+      </p>
+      <div class="hero-tags">
+        <span class="hero-pill"><i class="fa-solid fa-database"></i> 50 Startups Dataset</span>
+        <span class="hero-pill"><i class="fa-solid fa-bolt"></i> 5 種特徵選擇方法</span>
+        <span class="hero-pill"><i class="fa-solid fa-star" style="color:#34d399;"></i> 全域甜蜜點：<span id="heroBest">k=1</span></span>
+        <span class="hero-pill"><i class="fa-solid fa-triangle-exclamation" style="color:#fbbf24;"></i> 過擬合警示：全模型 k=5</span>
+      </div>
+    </div>
+
+    <div class="controls-wrapper">
+      <span class="control-label"><i class="fa-solid fa-sliders"></i> 1. 選擇特徵選擇方法</span>
+      <div class="tabs-pills" id="algoTabs">
+        <button class="tab-btn active" data-algo="Forward Selection"><i class="fa-solid fa-arrow-trend-up"></i> Forward Selection <span class="badge-pill">Greedy</span></button>
+        <button class="tab-btn" data-algo="Backward Elimination"><i class="fa-solid fa-scissors"></i> Backward Elimination <span class="badge-pill">Backward</span></button>
+        <button class="tab-btn" data-algo="Lasso (L1)"><i class="fa-solid fa-filter"></i> Lasso (L1) <span class="badge-pill">Ranking</span></button>
+        <button class="tab-btn" data-algo="RF Importance"><i class="fa-solid fa-tree"></i> RF Importance <span class="badge-pill">Ensemble</span></button>
+        <button class="tab-btn" data-algo="Mutual Information"><i class="fa-solid fa-diagram-project"></i> Mutual Information <span class="badge-pill">Filter</span></button>
+        <button class="tab-btn" data-algo="ALL" style="border-left:2px solid var(--primary-light);"><i class="fa-solid fa-layer-group"></i> 🌟 比較全部 5 種方法</button>
+      </div>
+
+      <span class="control-label" style="margin-top:12px;"><i class="fa-solid fa-list-ol"></i> 2. 特徵數量（k = 1 到 5）</span>
+      <div class="k-selector-group" id="kSelectorGroup">
+        <button class="k-btn" data-k="1">k = 1 <span style="font-weight:400;font-size:11px;">(R&D Spend)</span></button>
+        <button class="k-btn" data-k="2">k = 2 <span style="font-size:11px;">(+ Marketing)</span></button>
+        <button class="k-btn" data-k="3">k = 3 <span style="font-size:11px;">(3 predictors)</span></button>
+        <button class="k-btn" data-k="4">k = 4 <span style="font-size:11px;">(4 predictors)</span></button>
+        <button class="k-btn overfitting" data-k="5">k = 5 ⚠ 全模型 <span style="font-size:11px;font-weight:700;">(Overfitting)</span></button>
+      </div>
+    </div>
+
+    <div class="metrics-grid" id="metricsGrid">
+      <div class="metric-card" id="cardRMSE">
+        <div class="metric-title"><span>Test RMSE</span><span class="badge-tag badge-blue" id="rmseBadge">—</span></div>
+        <div class="metric-val" id="valRMSE">—</div>
+        <div class="metric-note"><span>越低越好（樣本外測試）</span></div>
+      </div>
+      <div class="metric-card" id="cardR2">
+        <div class="metric-title"><span>R² Score</span><span class="badge-tag badge-blue" id="r2Badge">—</span></div>
+        <div class="metric-val" id="valR2">—</div>
+        <div class="metric-note"><span>解釋的 Profit 變異比例</span></div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-title"><span>Adjusted R²</span><i class="fa-solid fa-scale-balanced" style="color:var(--text-dim);"></i></div>
+        <div class="metric-val" id="valAdjR2">—</div>
+        <div class="metric-note"><span>懲罰多餘參數</span></div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-title"><span>Mean Absolute Error</span><i class="fa-solid fa-calculator" style="color:var(--text-dim);"></i></div>
+        <div class="metric-val" id="valMAE">—</div>
+        <div class="metric-note"><span>平均預測誤差（美元）</span></div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-title"><span>F-Statistic</span><span class="badge-tag badge-green" id="fBadge">—</span></div>
+        <div class="metric-val" id="valFStat">—</div>
+        <div class="metric-note"><span>模型整體顯著性</span></div>
+      </div>
+    </div>
+
+    <div style="background:linear-gradient(180deg,var(--surface),var(--bg-soft));border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 20px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <span style="font-size:13px;font-weight:700;color:#cbd6e8;">
+          <i class="fa-solid fa-check-double" style="color:var(--primary-light);"></i> 目前選用特徵（<span id="featuresCount">1</span>）：
+        </span>
+        <div id="featuresListChips" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+      </div>
+      <div id="parsimonyNotice" class="badge-tag badge-green" style="font-size:12px;padding:4px 10px;"></div>
+    </div>
+
+    <div class="dual-charts-grid">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title-group">
+            <h3><i class="fa-solid fa-chart-line" style="color:var(--primary-light);"></i> RMSE by Number of Features</h3>
+            <div class="card-subtitle">越低越好。點擊資料點可切換 k。</div>
+          </div>
+          <span class="badge-tag badge-blue" id="rmseChartBadge">—</span>
+        </div>
+        <div class="chart-container"><canvas id="rmseChart"></canvas></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title-group">
+            <h3><i class="fa-solid fa-arrow-trend-up" style="color:var(--emerald);"></i> R-squared by Number of Features</h3>
+            <div class="card-subtitle">越高越好。峰值即為甜蜜點。</div>
+          </div>
+          <span class="badge-tag badge-green" id="r2ChartBadge">—</span>
+        </div>
+        <div class="chart-container"><canvas id="r2Chart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="equation-card">
+      <div class="equation-title"><i class="fa-solid fa-square-root-variable"></i> 配適的 OLS 迴歸方程式（原始尺度）</div>
+      <div class="equation-formula" id="equationBox">—</div>
+    </div>
+
+    <div class="calc-grid">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title-group">
+            <h3><i class="fa-solid fa-table" style="color:var(--primary-light);"></i> 模型係數與統計檢定</h3>
+            <div class="card-subtitle">參數估計、標準誤、t 統計量、p 值與 VIF 共線性診斷。</div>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="data-table" id="coefTable">
+            <thead>
+              <tr>
+                <th>Predictor</th><th>Estimate (β)</th><th>Std. Error</th>
+                <th>t-Stat</th><th>p-Value</th><th>95% Conf. Int</th><th>VIF</th>
+              </tr>
+            </thead>
+            <tbody id="coefTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title-group">
+            <h3><i class="fa-solid fa-calculator" style="color:var(--emerald);"></i> 即時利潤預測器</h3>
+            <div class="card-subtitle">使用目前模型即時試算。</div>
+          </div>
+          <span class="badge-tag badge-green"><i class="fa-solid fa-bolt"></i> Real-time</span>
+        </div>
+
+        <div>
+          <div class="input-group" id="inputGroupRD">
+            <div class="input-label-row"><span>R&amp;D Spend ($)</span><span id="labelRD" style="color:var(--primary-light);font-family:'Fira Code',monospace;">$100,000</span></div>
+            <input type="number" id="numRD" class="input-field" value="100000" min="0" max="250000" step="5000">
+            <input type="range" id="rangeRD" class="range-slider" value="100000" min="0" max="250000" step="5000">
+          </div>
+
+          <div class="input-group" id="inputGroupMkt">
+            <div class="input-label-row"><span>Marketing Spend ($)</span><span id="labelMkt" style="color:var(--primary-light);font-family:'Fira Code',monospace;">$150,000</span></div>
+            <input type="number" id="numMkt" class="input-field" value="150000" min="0" max="500000" step="5000">
+            <input type="range" id="rangeMkt" class="range-slider" value="150000" min="0" max="500000" step="5000">
+          </div>
+
+          <div class="input-group" id="inputGroupAdmin">
+            <div class="input-label-row"><span>Administration ($)</span><span id="labelAdmin" style="color:var(--text-muted);font-family:'Fira Code',monospace;">$120,000</span></div>
+            <input type="number" id="numAdmin" class="input-field" value="120000" min="0" max="250000" step="5000">
+            <input type="range" id="rangeAdmin" class="range-slider" value="120000" min="0" max="250000" step="5000">
+          </div>
+
+          <div class="input-group" id="inputGroupState">
+            <div class="input-label-row"><span>State Location</span></div>
+            <select id="selectState" class="input-field">
+              <option value="California">California (Reference)</option>
+              <option value="New York">New York</option>
+              <option value="Florida">Florida</option>
+            </select>
+          </div>
+
+          <div class="prediction-output-box">
+            <div class="pred-label">Predicted Startup Profit</div>
+            <div class="pred-value" id="predProfitOutput">—</div>
+            <div class="pred-formula-note" id="predFormulaNote">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:24px;">
+      <div class="card-header">
+        <div class="card-title-group">
+          <h3><i class="fa-solid fa-magnifying-glass" style="color:var(--amber);"></i> 測試集殘差與離群值診斷</h3>
+          <div class="card-subtitle">樣本外測試集（10 家新創）依絕對殘差排序。</div>
+        </div>
+        <span class="badge-tag badge-blue"><i class="fa-solid fa-filter"></i> Sorted by |Residual|</span>
+      </div>
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Rank</th><th>Sample ID</th><th>Actual Profit</th><th>Predicted Profit</th>
+              <th>Residual ($)</th><th>Abs Error</th><th>% Error</th><th>Diagnostic Status</th>
+            </tr>
+          </thead>
+          <tbody id="outliersTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <div class="footer-inner">
+      <div style="max-width:650px;">
+        <h4 style="font-size:16px;margin-bottom:8px;color:#eef3ff;"><i class="fa-solid fa-building-columns"></i> 50 Startups CRISP-DM 機器學習專題</h4>
+        <p style="line-height:1.6;font-size:13px;">
+          用於多元線性迴歸模型選擇、精簡性（parsimony）驗證與統計推論。以純 HTML、CSS、JavaScript 與 Chart.js 建構。
+        </p>
+      </div>
+      <div style="max-width:550px;">
+        <h4 style="font-size:14px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-dim);margin-bottom:8px;">參考與致謝</h4>
+        <div class="ack-card">
+          <strong>資料集：</strong>50 Startups（R&amp;D Spend、Administration、Marketing Spend、State、Profit）。<br>
+          <strong>方法：</strong>CRISP-DM；線性模型以 <code>statsmodels</code> OLS 估計，特徵選擇以 <code>scikit-learn</code> 執行。
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const SCHEMES = ['Forward Selection', 'Backward Elimination', 'Lasso (L1)', 'RF Importance', 'Mutual Information'];
+    const ALGO_COLORS = {
+      'Forward Selection': '#60a5fa',
+      'Backward Elimination': '#fb923c',
+      'Lasso (L1)': '#f87171',
+      'RF Importance': '#c084fc',
+      'Mutual Information': '#34d399'
+    };
+
+    let currentAlgo = 'Forward Selection';
+    let currentK = 1;
+    let rmseChartInstance = null;
+    let r2ChartInstance = null;
+    const numFmt = (v) => '$' + v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    function schemeBestK(scheme) {
+      const rows = window.MODEL_DATA[scheme];
+      return rows.reduce((b, r) => (r.rmse < b.rmse ? r : b), rows[0]).k;
+    }
+
+    function bestSchemeAtK(k) {
+      let best = null;
+      SCHEMES.forEach(s => {
+        const item = window.MODEL_DATA[s][k - 1];
+        if (!best || item.rmse < best.item.rmse) best = { scheme: s, item };
+      });
+      return best;
+    }
+
+    function getContext() {
+      if (currentAlgo === 'ALL') {
+        const b = bestSchemeAtK(currentK);
+        return { scheme: b.scheme, item: b.item };
+      }
+      return { scheme: currentAlgo, item: window.MODEL_DATA[currentAlgo][currentK - 1] };
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initCharts();
+      setupEventListeners();
+      initHero();
+      updateDashboard();
+    });
+
+    function initHero() {
+      let best = null;
+      SCHEMES.forEach(s => {
+        window.MODEL_DATA[s].forEach(r => { if (!best || r.rmse < best.rmse) best = r; });
+      });
+      document.getElementById('heroBest').textContent =
+        `k=${best.k}（${numFmt(best.rmse)} RMSE）`;
+    }
+
+    function setupEventListeners() {
+      const tabs = document.querySelectorAll('#algoTabs .tab-btn');
+      tabs.forEach(btn => btn.addEventListener('click', () => {
+        tabs.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentAlgo = btn.dataset.algo;
+        currentK = schemeBestK(currentAlgo === 'ALL' ? 'Forward Selection' : currentAlgo);
+        updateDashboard();
+      }));
+
+      const kBtns = document.querySelectorAll('#kSelectorGroup .k-btn');
+      kBtns.forEach(btn => btn.addEventListener('click', () => {
+        kBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentK = parseInt(btn.dataset.k);
+        updateDashboard();
+      }));
+
+      const syncInput = (sliderId, numId, labelId) => {
+        const slider = document.getElementById(sliderId);
+        const num = document.getElementById(numId);
+        const label = document.getElementById(labelId);
+        slider.addEventListener('input', e => { num.value = e.target.value; label.textContent = '$' + Number(e.target.value).toLocaleString(); calculateLivePrediction(); });
+        num.addEventListener('input', e => { slider.value = e.target.value; label.textContent = '$' + Number(e.target.value).toLocaleString(); calculateLivePrediction(); });
+      };
+      syncInput('rangeRD', 'numRD', 'labelRD');
+      syncInput('rangeMkt', 'numMkt', 'labelMkt');
+      syncInput('rangeAdmin', 'numAdmin', 'labelAdmin');
+      document.getElementById('selectState').addEventListener('change', calculateLivePrediction);
+    }
+
+    function updateDashboard() {
+      const { scheme, item } = getContext();
+      const bestK = schemeBestK(scheme);
+
+      document.querySelectorAll('#kSelectorGroup .k-btn').forEach(b => {
+        const k = parseInt(b.dataset.k);
+        b.classList.toggle('active', k === currentK);
+        b.classList.toggle('sweet-spot', k === bestK);
+      });
+
+      document.getElementById('valRMSE').textContent = numFmt(item.rmse);
+      document.getElementById('valR2').textContent = item.r2.toFixed(4);
+      document.getElementById('valAdjR2').textContent = item.adj_r2 != null ? item.adj_r2.toFixed(4) : 'N/A';
+      document.getElementById('valMAE').textContent = numFmt(item.mae);
+      document.getElementById('valFStat').textContent = item.f_stat != null ? item.f_stat.toFixed(1) : 'N/A';
+
+      const rmseBadge = document.getElementById('rmseBadge');
+      if (currentK === bestK) {
+        rmseBadge.className = 'badge-tag badge-green';
+        rmseBadge.innerHTML = '<i class="fa-solid fa-award"></i> 最佳甜蜜點';
+      } else if (currentK > bestK) {
+        rmseBadge.className = 'badge-tag badge-amber';
+        rmseBadge.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> 過擬合風險';
+      } else {
+        rmseBadge.className = 'badge-tag badge-blue';
+        rmseBadge.innerHTML = `k = ${currentK}`;
+      }
+
+      document.getElementById('r2Badge').textContent = `Fit ${(item.r2 * 100).toFixed(2)}%`;
+      document.getElementById('fBadge').innerHTML = item.f_stat != null
+        ? '<i class="fa-solid fa-circle-check"></i> 顯著'
+        : 'N/A';
+      document.getElementById('r2ChartBadge').textContent = `峰值 k=${bestK}`;
+
+      document.getElementById('featuresCount').textContent = item.features.length;
+      const chips = document.getElementById('featuresListChips');
+      chips.innerHTML = '';
+      item.features.forEach(f => {
+        const chip = document.createElement('span');
+        chip.className = 'feature-chip';
+        chip.textContent = f;
+        chips.appendChild(chip);
+      });
+
+      const notice = document.getElementById('parsimonyNotice');
+      if (currentK === bestK) {
+        notice.className = 'badge-tag badge-green';
+        notice.innerHTML = `<i class="fa-solid fa-star"></i> 奧坎剃刀：${scheme} 在 k=${bestK} 取得最小測試 RMSE（${numFmt(item.rmse)}）。`;
+      } else if (currentK > bestK) {
+        notice.className = 'badge-tag badge-amber';
+        notice.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> 過擬合警示：相較 k=${bestK}，增加特徵使測試誤差上升至 ${numFmt(item.rmse)}。`;
+      } else {
+        notice.className = 'badge-tag badge-blue';
+        notice.innerHTML = `<i class="fa-solid fa-circle-info"></i> 以 ${currentK} 個預測變數評估。`;
+      }
+
+      updateEquation(item.coefficients);
+      updateCoefficientsTable(item.coefficients);
+      updateOutliersTable(item.outliers);
+      updateInputAvailability(item.features);
+      updateCharts();
+      calculateLivePrediction();
+    }
+
+    function updateEquation(coefficients) {
+      const box = document.getElementById('equationBox');
+      const intercept = coefficients.find(c => c.feature === 'Intercept');
+      const parts = [];
+      if (intercept) parts.push(`<span class="eq-intercept">${intercept.coef.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>`);
+      coefficients.forEach(c => {
+        if (c.feature === 'Intercept') return;
+        const sign = c.coef >= 0 ? '<span class="eq-pos">+</span>' : '<span class="eq-neg">−</span>';
+        parts.push(`${sign} ${Math.abs(c.coef).toFixed(4)} × <span class="eq-var">(${c.feature})</span>`);
+      });
+      box.innerHTML = `<strong>Profit</strong> = ${parts.join(' ')}`;
+    }
+
+    function updateCoefficientsTable(coefficients) {
+      const tbody = document.getElementById('coefTableBody');
+      tbody.innerHTML = '';
+      coefficients.forEach(c => {
+        const tr = document.createElement('tr');
+        const isIntercept = c.feature === 'Intercept';
+        const pBadge = c.pvalue < 0.05
+          ? `<span class="badge-tag badge-green">${c.pvalue < 0.0001 ? '< 0.0001' : c.pvalue.toFixed(4)} <i class="fa-solid fa-check"></i></span>`
+          : `<span class="badge-tag badge-amber">${c.pvalue.toFixed(4)} (n.s.)</span>`;
+        let vifDisplay = '-';
+        if (!isIntercept && c.vif != null) {
+          vifDisplay = c.vif < 5
+            ? `<span class="badge-tag badge-green">${c.vif.toFixed(2)} (Safe)</span>`
+            : `<span class="badge-tag badge-amber">${c.vif.toFixed(2)} (Collinear)</span>`;
+        }
+        tr.innerHTML = `
+          <td><strong>${c.feature}</strong></td>
+          <td style="font-family:'Fira Code',monospace;font-weight:600;">${c.coef.toLocaleString('en-US',{minimumFractionDigits:4,maximumFractionDigits:4})}</td>
+          <td>${c.stderr.toFixed(4)}</td>
+          <td>${c.tstat.toFixed(3)}</td>
+          <td>${pBadge}</td>
+          <td style="font-size:12px;color:var(--text-muted);">[${c.ci_lower.toFixed(2)}, ${c.ci_upper.toFixed(2)}]</td>
+          <td>${vifDisplay}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function updateOutliersTable(outliers) {
+      const tbody = document.getElementById('outliersTableBody');
+      tbody.innerHTML = '';
+      outliers.forEach(o => {
+        const tr = document.createElement('tr');
+        const isHigh = o.abs_error > 10000;
+        const status = isHigh
+          ? `<span class="badge-tag badge-amber"><span class="status-dot dot-amber"></span> 高殘差</span>`
+          : `<span class="badge-tag badge-green"><span class="status-dot dot-green"></span> 範圍內</span>`;
+        tr.innerHTML = `
+          <td style="font-weight:700;">#${o.rank}</td>
+          <td>Startup #${o.index}</td>
+          <td style="font-family:'Fira Code',monospace;">${numFmt(o.actual)}</td>
+          <td style="font-family:'Fira Code',monospace;">${numFmt(o.predicted)}</td>
+          <td style="color:${o.residual >= 0 ? '#34d399' : '#fb7185'};font-weight:600;">${o.residual >= 0 ? '+' : '−'}${numFmt(Math.abs(o.residual))}</td>
+          <td>${numFmt(o.abs_error)}</td>
+          <td>${o.pct_error.toFixed(2)}%</td>
+          <td>${status}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function updateInputAvailability(features) {
+      const map = {
+        'R&D Spend': 'inputGroupRD',
+        'Marketing Spend': 'inputGroupMkt',
+        'Administration': 'inputGroupAdmin'
+      };
+      Object.entries(map).forEach(([feat, id]) => {
+        document.getElementById(id).classList.toggle('disabled', !features.includes(feat));
+      });
+      const usesState = features.some(f => f.startsWith('State_'));
+      document.getElementById('inputGroupState').classList.toggle('disabled', !usesState);
+    }
+
+    function calculateLivePrediction() {
+      const { item } = getContext();
+      if (!item) return;
+
+      const rd = parseFloat(document.getElementById('numRD').value) || 0;
+      const mkt = parseFloat(document.getElementById('numMkt').value) || 0;
+      const admin = parseFloat(document.getElementById('numAdmin').value) || 0;
+      const state = document.getElementById('selectState').value;
+
+      let pred = 0;
+      const used = [];
+      item.coefficients.forEach(c => {
+        if (c.feature === 'Intercept') { pred += c.coef; }
+        else if (c.feature === 'R&D Spend') { pred += c.coef * rd; used.push(`R&D: ${(c.coef * rd).toFixed(0)}`); }
+        else if (c.feature === 'Marketing Spend') { pred += c.coef * mkt; used.push(`Marketing: ${(c.coef * mkt).toFixed(0)}`); }
+        else if (c.feature === 'Administration') { pred += c.coef * admin; used.push(`Admin: ${(c.coef * admin).toFixed(0)}`); }
+        else if (c.feature === 'State_Florida' && state === 'Florida') { pred += c.coef; used.push(`Florida: ${c.coef.toFixed(0)}`); }
+        else if (c.feature === 'State_New York' && state === 'New York') { pred += c.coef; used.push(`NY: ${c.coef.toFixed(0)}`); }
+      });
+
+      document.getElementById('predProfitOutput').textContent = numFmt(pred);
+      document.getElementById('predFormulaNote').innerHTML =
+        `使用特徵：${item.features.join(', ')}<br><span style="font-size:11px;color:#8fa2c9;">(${used.join(' | ')})</span>`;
+    }
+
+    function initCharts() {
+      const ctxRMSE = document.getElementById('rmseChart').getContext('2d');
+      const ctxR2 = document.getElementById('r2Chart').getContext('2d');
+
+      const commonOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false, position: 'top', labels: { color: '#cbd6e8', font: { family: 'Inter', size: 12 } } },
+          tooltip: {
+            backgroundColor: 'rgba(9,14,26,.95)',
+            borderColor: '#2b3f68',
+            borderWidth: 1,
+            titleColor: '#eef3ff',
+            bodyColor: '#cbd6e8',
+            titleFont: { family: 'Outfit', size: 13 },
+            bodyFont: { family: 'Inter', size: 12 },
+            padding: 12,
+            cornerRadius: 8,
+            callbacks: {
+              afterLabel: function (context) {
+                const k = context.dataIndex + 1;
+                const algo = currentAlgo === 'ALL' ? context.dataset.label : currentAlgo;
+                return 'Features: ' + window.MODEL_DATA[algo][k - 1].features.join(', ');
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            title: { display: true, text: 'Number of Features (k)', color: '#93a4c0', font: { family: 'Inter', weight: 600, size: 12 } },
+            grid: { color: 'rgba(148,163,184,.12)' },
+            ticks: { color: '#93a4c0' }
+          },
+          y: {
+            grid: { color: 'rgba(148,163,184,.12)' },
+            ticks: { color: '#93a4c0' }
+          }
+        },
+        onClick: (e, elements) => {
+          if (elements.length > 0) {
+            const newK = elements[0].index + 1;
+            document.querySelectorAll('#kSelectorGroup .k-btn').forEach(b => {
+              if (parseInt(b.dataset.k) === newK) b.click();
+            });
+          }
+        }
+      };
+
+      rmseChartInstance = new Chart(ctxRMSE, {
+        type: 'line',
+        data: { labels: ['1', '2', '3', '4', '5'], datasets: [] },
+        options: { ...commonOptions, scales: { ...commonOptions.scales, y: { ...commonOptions.scales.y, title: { display: true, text: 'RMSE ($) (Lower is Better)', color: '#93a4c0', font: { family: 'Inter', weight: 600, size: 12 } } } } }
+      });
+
+      r2ChartInstance = new Chart(ctxR2, {
+        type: 'line',
+        data: { labels: ['1', '2', '3', '4', '5'], datasets: [] },
+        options: { ...commonOptions, scales: { ...commonOptions.scales, y: { ...commonOptions.scales.y, title: { display: true, text: 'R-squared (Higher is Better)', color: '#93a4c0', font: { family: 'Inter', weight: 600, size: 12 } } } } }
+      });
+    }
+
+    function updateCharts() {
+      const isCompare = currentAlgo === 'ALL';
+      document.getElementById('rmseChartBadge').textContent = isCompare ? '比較 5 種方法' : currentAlgo;
+
+      const algos = isCompare ? SCHEMES : [currentAlgo];
+      const rmseSets = [], r2Sets = [];
+
+      algos.forEach(algo => {
+        const data = window.MODEL_DATA[algo];
+        const color = ALGO_COLORS[algo] || '#6366f1';
+        const bestK = schemeBestK(algo);
+        const radii = data.map(d => d.k === currentK ? 7 : (d.k === bestK ? 6 : 4));
+        const colors = data.map(d => d.k === bestK ? '#34d399' : color);
+
+        const base = {
+          label: algo,
+          borderColor: color,
+          backgroundColor: color,
+          borderWidth: 2.5,
+          tension: 0.1,
+          pointRadius: radii,
+          pointBackgroundColor: colors,
+          pointBorderColor: '#0b1220',
+          pointBorderWidth: 2
+        };
+        rmseSets.push({ ...base, data: data.map(d => d.rmse) });
+        r2Sets.push({ ...base, data: data.map(d => d.r2) });
+      });
+
+      rmseChartInstance.data.datasets = rmseSets;
+      r2ChartInstance.data.datasets = r2Sets;
+      rmseChartInstance.options.plugins.legend.display = isCompare;
+      r2ChartInstance.options.plugins.legend.display = isCompare;
+      rmseChartInstance.update();
+      r2ChartInstance.update();
+    }
+  </script>
+</body>
+</html>
