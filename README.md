@@ -36,7 +36,7 @@ Live Demo: [https://wilber830915.github.io/AIoT-DIC2-MultipleLR/](https://wilber
 
 本專案同時包含**模型訓練腳本**與**視覺化網頁**兩部分：
 
-1. `main.py`：執行完整的 CRISP-DM 分析流程，輸出 5 種特徵選擇方法在各特徵數量下的 RMSE / R² 對照表。
+1. `main.py`：執行資料前處理、5 種特徵選擇與測試集評估，輸出各特徵數量下的 RMSE / R² 對照表。
 2. `export_model_data.py`：將各模型（係數、標準誤、t 值、p 值、信賴區間、VIF、殘差）匯出為 `model_data.js`。
 3. `index.html`：純 HTML / CSS / JavaScript（搭配 Chart.js）打造的**深色專業儀表板**互動網頁，
    可即時切換特徵選擇方法、特徵數 `k`，並用任一模型試算新創公司利潤。
@@ -72,13 +72,13 @@ Live Demo: [https://wilber830915.github.io/AIoT-DIC2-MultipleLR/](https://wilber
 ## 專案結構
 
 ```
-L5V2/
+L5_DIC2/
 ├── 50_Startups.csv          # 資料集
-├── main.py                  # CRISP-DM 主分析腳本（特徵選擇 + 評估）
-├── export_model_data.py     # 匯出模型資料為 model_data.js（供網頁使用）
+├── main.py                  # 特徵選擇與模型評估腳本（scikit-learn）
+├── export_model_data.py     # 匯出 OLS 模型資料為 model_data.js（供網頁使用）
 ├── model_data.js            # 網頁資料來源（各方法 × 各 k 的完整模型結果）
 ├── index.html               # 互動式網頁（深色儀表板）
-├── startup_profit_model.joblib  # main.py 訓練後儲存的模型（若有執行）
+├── startup_profit_model.joblib  # 既有模型檔（目前腳本未重新產生）
 └── README.md
 ```
 
@@ -106,7 +106,7 @@ pip install pandas numpy scikit-learn statsmodels scipy joblib matplotlib
 python3 main.py
 ```
 
-會印出資料探索、5 種特徵選擇方法的完整結果表，以及各方法的最佳特徵組合摘要。
+會印出 5 種特徵選擇方法的完整測試結果表，以及各方法的最佳特徵組合摘要。
 
 ### 2. 重新產生網頁資料
 
@@ -132,10 +132,10 @@ python3 -m http.server 8000
 | 階段 | 內容 |
 | --- | --- |
 | 1. Business Understanding | 以支出與州別預測新創利潤，屬監督式迴歸問題 |
-| 2. Data Understanding | 檢視前 5 列、`info()`、描述統計、缺失值、重複列、相關矩陣、利潤分布圖 |
-| 3. Data Preparation | One-Hot 編碼 `State`、切分訓練/測試集（80/20, `random_state=42`）、`StandardScaler` 標準化 |
-| 4. Modeling | 以 `LinearRegression` 搭配 5 種特徵選擇方法，遍歷 `k = 1…5` |
-| 5. Evaluation | 以測試集 RMSE、R² 評估；`statsmodels` OLS 提供係數檢定與 VIF |
+| 2. Data Understanding | 讀取 `50_Startups.csv`，確認欄位與資料型別（50 筆、5 欄） |
+| 3. Data Preparation | One-Hot 編碼 `State`（`drop_first=True`）、切分訓練/測試集（80/20, `random_state=42`）、`StandardScaler` 標準化 |
+| 4. Modeling | `main.py` 以 `LinearRegression` 搭配 5 種特徵選擇方法：Forward / Backward 遍歷 `k = 1…4`，Lasso / RF / MI 取 `k = 1…5` |
+| 5. Evaluation | `main.py` 以測試集 RMSE、R² 評估；`export_model_data.py` 另以 `statsmodels` OLS 提供係數檢定與 VIF |
 | 6. Deployment | 輸出 `model_data.js` 與互動式網頁 `index.html` |
 
 > **註：** 特徵選擇階段在**標準化**特徵上進行（避免尺度影響貪婪搜尋）；

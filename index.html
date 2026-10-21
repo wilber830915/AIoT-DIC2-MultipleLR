@@ -986,7 +986,7 @@
       const notice = document.getElementById('parsimonyNotice');
       if (currentK === bestK) {
         notice.className = 'badge-tag badge-green';
-        notice.innerHTML = `<i class="fa-solid fa-star"></i> 奧坎剃刀：${scheme} 在 k=${bestK} 取得最小測試 RMSE（${numFmt(item.rmse)}）。`;
+        notice.innerHTML = `<i class="fa-solid fa-star"></i> 最佳甜蜜點：${scheme} 在 k=${bestK} 取得最小測試 RMSE（${numFmt(item.rmse)}）。`;
       } else if (currentK > bestK) {
         notice.className = 'badge-tag badge-amber';
         notice.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> 過擬合警示：相較 k=${bestK}，增加特徵使測試誤差上升至 ${numFmt(item.rmse)}。`;
