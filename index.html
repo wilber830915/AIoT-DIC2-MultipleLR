@@ -257,27 +257,402 @@
       .hero-card { padding: 24px; }
       .hero-card h2 { font-size: 24px; }
     }
+
+    /* ========== 2026 介面風格更新 ========== */
+    :root {
+      --bg: #060a13;
+      --bg-soft: #0a111e;
+      --surface: #111a2c;
+      --surface-2: #17233a;
+      --surface-hover: #1d2c48;
+      --border: rgba(125, 150, 205, .16);
+      --border-soft: rgba(125, 150, 205, .09);
+      --text: #e9effb;
+      --text-muted: #95a6c4;
+      --text-dim: #65758f;
+
+      --primary: #5b7cfa;
+      --primary-light: #8ea7ff;
+      --primary-dark: #3d54cc;
+      --primary-subtle: rgba(91, 124, 250, .14);
+
+      --emerald: #2dd4bf;
+      --emerald-subtle: rgba(45, 212, 191, .12);
+      --amber: #fbbf24;
+      --amber-subtle: rgba(251, 191, 36, .12);
+      --rose: #fb7185;
+      --cyan: #22d3ee;
+
+      --radius-sm: 10px;
+      --radius-md: 14px;
+      --radius-lg: 18px;
+      --radius-xl: 24px;
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, .35);
+      --shadow-md: 0 18px 40px -24px rgba(0, 0, 0, .9);
+      --shadow-lg: 0 40px 90px -40px rgba(0, 0, 0, .95);
+      --glow: 0 10px 28px -10px rgba(91, 124, 250, .8);
+    }
+
+    ::selection { background: rgba(91, 124, 250, .35); color: #fff; }
+    ::-webkit-scrollbar { width: 10px; height: 10px; }
+    ::-webkit-scrollbar-track { background: #070c16; }
+    ::-webkit-scrollbar-thumb { background: #243350; border-radius: 99px; border: 2px solid #070c16; }
+    ::-webkit-scrollbar-thumb:hover { background: #33456a; }
+
+    body {
+      background:
+        radial-gradient(1200px 720px at 84% -14%, rgba(91,124,250,.20), transparent 62%),
+        radial-gradient(900px 600px at -10% 6%, rgba(34,211,238,.10), transparent 58%),
+        radial-gradient(900px 600px at 50% 112%, rgba(45,212,191,.07), transparent 60%),
+        var(--bg);
+      background-attachment: fixed;
+      line-height: 1.55;
+      isolation: isolate;
+    }
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: -1; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(148,163,184,.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(148,163,184,.045) 1px, transparent 1px);
+      background-size: 64px 64px;
+      -webkit-mask-image: radial-gradient(ellipse 90% 55% at 50% 0%, #000 10%, transparent 78%);
+      mask-image: radial-gradient(ellipse 90% 55% at 50% 0%, #000 10%, transparent 78%);
+      opacity: .55;
+    }
+
+    .container { position: relative; z-index: 1; padding-top: 28px; }
+
+    /* ---------- Header ---------- */
+    .top-header {
+      background: rgba(6, 10, 19, .72);
+      -webkit-backdrop-filter: blur(18px) saturate(150%);
+      backdrop-filter: blur(18px) saturate(150%);
+      border-bottom: 1px solid var(--border-soft);
+    }
+    .header-inner {
+      max-width: 1380px; margin: 0 auto; padding: 14px 20px;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 18px; flex-wrap: wrap;
+    }
+    .brand { display: flex; align-items: center; gap: 14px; min-width: 0; }
+    .brand-logo {
+      width: 46px; height: 46px; border-radius: 15px; flex-shrink: 0;
+      display: grid; place-items: center; font-size: 19px; color: #fff;
+      background: linear-gradient(140deg, #4f6ef7 0%, #6d7cf9 45%, #22d3ee 100%);
+      box-shadow: 0 10px 26px -10px rgba(91,124,250,.85), inset 0 1px 0 rgba(255,255,255,.28);
+    }
+    .brand-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+    .brand-text h1 {
+      font-size: 18px; font-weight: 700; line-height: 1.3; letter-spacing: -.015em;
+      color: #f3f7ff; display: flex; align-items: center; gap: 10px;
+    }
+    .brand-sub {
+      font-size: 10.5px; font-weight: 600; letter-spacing: .16em;
+      text-transform: uppercase; color: var(--text-dim);
+    }
+    .header-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .header-chip {
+      display: inline-flex; align-items: center; gap: 7px;
+      font-size: 12px; font-weight: 600; color: var(--text-muted);
+      padding: 7px 12px; border-radius: 9999px;
+      background: rgba(23, 35, 58, .55); border: 1px solid var(--border);
+    }
+    .header-chip i { color: var(--primary-light); }
+    .header-chip.accent {
+      color: var(--emerald); background: var(--emerald-subtle);
+      border-color: rgba(45, 212, 191, .3);
+    }
+    .header-chip.accent i { color: var(--emerald); }
+
+    /* ---------- Hero ---------- */
+    .hero-card {
+      position: relative; overflow: hidden; padding: 42px 44px; margin-bottom: 28px;
+      border-radius: var(--radius-xl);
+      border: 1px solid rgba(139, 163, 255, .22);
+      background:
+        radial-gradient(720px 320px at 88% -22%, rgba(91,124,250,.42), transparent 64%),
+        radial-gradient(520px 280px at 4% 120%, rgba(34,211,238,.16), transparent 66%),
+        linear-gradient(135deg, #101a35 0%, #0b1427 58%, #080f1d 100%);
+      box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255,255,255,.06);
+    }
+    .hero-card::before,
+    .hero-card::after {
+      content: ''; position: absolute; border-radius: 50%;
+      background: none; pointer-events: none;
+    }
+    .hero-card::before {
+      top: -150px; right: -90px; width: 420px; height: 420px;
+      border: 1px solid rgba(139, 163, 255, .18);
+    }
+    .hero-card::after {
+      top: -70px; right: -10px; width: 280px; height: 280px;
+      background: none; border: 1px solid rgba(34, 211, 238, .16);
+    }
+    .hero-eyebrow {
+      position: relative; z-index: 1;
+      display: inline-flex; align-items: center; gap: 8px; margin-bottom: 16px;
+      font-size: 11px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase;
+      color: var(--primary-light); padding: 6px 12px; border-radius: 9999px;
+      background: rgba(91, 124, 250, .12); border: 1px solid rgba(139, 163, 255, .28);
+    }
+    .hero-card h2 {
+      position: relative; z-index: 1;
+      font-size: 32px; line-height: 1.22; letter-spacing: -.02em;
+      color: #fff; margin-bottom: 14px; max-width: 820px;
+    }
+    .hero-card p {
+      position: relative; z-index: 1;
+      font-size: 15px; line-height: 1.8; color: #a7b6d6; max-width: 880px;
+    }
+    .hero-card strong { color: #dce5ff; font-weight: 600; }
+    .hero-tags { position: relative; z-index: 1; display: flex; gap: 10px; flex-wrap: wrap; margin-top: 24px; }
+    .hero-pill {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: rgba(255,255,255,.045); border: 1px solid rgba(139,163,255,.22);
+      color: #c6d2ee; font-size: 12px; font-weight: 500;
+      padding: 7px 14px; border-radius: 9999px;
+      -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+    }
+    .hero-pill i { color: var(--primary-light); }
+
+    /* ---------- Cards ---------- */
+    .card {
+      background: linear-gradient(180deg, rgba(20,30,50,.88), rgba(10,16,28,.94));
+      border-radius: var(--radius-lg); border: 1px solid var(--border);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.035), var(--shadow-md);
+      padding: 24px;
+      transition: border-color .25s, box-shadow .25s, transform .25s;
+    }
+    .card:hover {
+      border-color: rgba(139,163,255,.3);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.05), var(--shadow-lg);
+      transform: translateY(-2px);
+    }
+    .card-title-group h3 { font-size: 17.5px; letter-spacing: -.01em; color: #eef3ff; display: flex; align-items: center; gap: 9px; }
+    .card-subtitle { font-size: 12.5px; color: var(--text-muted); margin-top: 3px; }
+
+    /* ---------- Controls ---------- */
+    .controls-wrapper {
+      background: linear-gradient(180deg, rgba(20,30,50,.88), rgba(10,16,28,.94));
+      border-radius: var(--radius-lg); border: 1px solid var(--border);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.035), var(--shadow-md);
+      padding: 22px 24px; margin-bottom: 24px;
+    }
+    .control-label {
+      display: flex; align-items: center; gap: 7px;
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .12em; color: var(--text-dim); margin-bottom: 12px;
+    }
+    .control-label i { color: var(--primary-light); }
+    .tabs-pills { display: flex; flex-wrap: wrap; gap: 9px; margin-bottom: 22px; }
+    .tab-btn {
+      padding: 10px 16px; background: rgba(23, 35, 58, .55);
+      border: 1px solid var(--border); border-radius: 9999px;
+      font-size: 13px; font-weight: 600; color: var(--text-muted);
+      cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+      transition: all .2s;
+    }
+    .tab-btn:hover {
+      background: var(--surface-hover); border-color: rgba(139,163,255,.45);
+      color: var(--primary-light); transform: translateY(-1px);
+    }
+    .tab-btn.active {
+      background: linear-gradient(135deg, #3d54cc, #6d7cf9);
+      border-color: rgba(139,163,255,.75); color: #fff;
+      box-shadow: var(--glow);
+    }
+    .tab-btn .badge-pill {
+      font-size: 10px; padding: 2px 8px; border-radius: 9999px;
+      background: rgba(255,255,255,.08); color: var(--text-muted); letter-spacing: .03em;
+    }
+    .tab-btn.active .badge-pill { background: rgba(255,255,255,.22); color: #fff; }
+    .tab-btn.tab-all {
+      border-color: rgba(34,211,238,.4); color: var(--cyan);
+      background: linear-gradient(135deg, rgba(91,124,250,.16), rgba(34,211,238,.10));
+    }
+    .tab-btn.tab-all:hover { border-color: var(--cyan); color: #a5f3fc; }
+    .tab-btn.tab-all.active {
+      background: linear-gradient(135deg, #3d54cc, #0891b2);
+      border-color: rgba(34,211,238,.8); color: #fff;
+      box-shadow: 0 10px 26px -12px rgba(34,211,238,.8);
+    }
+    .k-selector-group { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .k-btn {
+      padding: 10px 16px; border: 1px solid var(--border);
+      background: rgba(23, 35, 58, .55); border-radius: var(--radius-md);
+      font-size: 13px; font-weight: 600; color: var(--text-muted);
+      cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+      transition: all .2s;
+    }
+    .k-btn:hover { border-color: rgba(139,163,255,.45); color: var(--primary-light); transform: translateY(-1px); }
+    .k-btn.active {
+      background: linear-gradient(135deg, #3d54cc, #6d7cf9);
+      border-color: rgba(139,163,255,.75); color: #fff; box-shadow: var(--glow);
+    }
+    .k-btn.sweet-spot { border-color: rgba(45,212,191,.45); color: var(--emerald); background: var(--emerald-subtle); }
+    .k-btn.sweet-spot.active {
+      background: linear-gradient(135deg, #0d9488, var(--emerald));
+      border-color: var(--emerald); color: #04231d;
+      box-shadow: 0 10px 26px -12px rgba(45,212,191,.85);
+    }
+    .k-btn.overfitting { border-color: rgba(251,191,36,.4); color: var(--amber); }
+    .k-btn.overfitting.active {
+      background: linear-gradient(135deg, #b45309, var(--amber));
+      border-color: var(--amber); color: #2b1a00;
+      box-shadow: 0 10px 26px -12px rgba(251,191,36,.7);
+    }
+
+    /* ---------- Metrics ---------- */
+    .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .metric-card {
+      background: linear-gradient(180deg, rgba(20,30,50,.88), rgba(10,16,28,.94));
+      border-radius: var(--radius-lg); border: 1px solid var(--border);
+      padding: 22px; position: relative; overflow: hidden;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.035), var(--shadow-md);
+      transition: all .25s;
+    }
+    .metric-card:hover {
+      transform: translateY(-3px); border-color: rgba(139,163,255,.3);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.05), var(--shadow-lg);
+    }
+    .metric-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--primary-dark), var(--primary-light), var(--cyan));
+    }
+    .metric-card.sweet::before { background: linear-gradient(90deg, #0d9488, var(--emerald)); }
+    .metric-card.alert::before { background: linear-gradient(90deg, #b45309, var(--amber)); }
+    .metric-title {
+      font-size: 11.5px; font-weight: 700; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: .08em; margin-bottom: 10px;
+      display: flex; justify-content: space-between; align-items: center; gap: 8px;
+    }
+    .metric-val {
+      font-size: 28px; font-family: 'Outfit', sans-serif; font-weight: 700;
+      color: #f4f8ff; line-height: 1.08; margin-bottom: 8px; letter-spacing: -.02em;
+    }
+    .metric-note { font-size: 12px; color: var(--text-dim); display: flex; align-items: center; gap: 5px; }
+
+    .badge-tag { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 9999px; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+    .badge-green { background: var(--emerald-subtle); color: var(--emerald); border: 1px solid rgba(45,212,191,.32); }
+    .badge-blue { background: var(--primary-subtle); color: var(--primary-light); border: 1px solid rgba(91,124,250,.38); }
+    .badge-amber { background: var(--amber-subtle); color: var(--amber); border: 1px solid rgba(251,191,36,.32); }
+
+    /* ---------- Feature strip ---------- */
+    .feature-strip {
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 12px; padding: 15px 20px; margin-bottom: 24px;
+      border-radius: var(--radius-md); border: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(20,30,50,.88), rgba(10,16,28,.94));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.035);
+    }
+    .feature-strip-left { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .feature-strip-label { font-size: 13px; font-weight: 700; color: #c7d3e7; display: inline-flex; align-items: center; gap: 8px; }
+    .feature-strip-label i { color: var(--primary-light); }
+    .feature-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+    #parsimonyNotice { font-size: 12px; padding: 5px 11px; }
+    .feature-chip { background: var(--primary-subtle); color: var(--primary-light); font-weight: 600; padding: 3px 10px; border-radius: 7px; font-size: 12px; display: inline-block; border: 1px solid rgba(91,124,250,.32); }
+
+    /* ---------- Charts / equation ---------- */
+    .chart-container { height: 340px; }
+    .equation-card {
+      background: linear-gradient(120deg, rgba(91,124,250,.10), rgba(45,212,191,.05));
+      border: 1px solid rgba(139,163,255,.24);
+      border-left: 4px solid var(--primary-light);
+      border-radius: var(--radius-md); padding: 22px 24px; margin-bottom: 24px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+    }
+    .equation-title { color: var(--primary-light); letter-spacing: .1em; }
+    .equation-formula {
+      background: rgba(5, 9, 17, .65); border: 1px solid var(--border-soft);
+      border-radius: var(--radius-sm); padding: 16px 18px; line-height: 1.95;
+    }
+    .eq-intercept { color: #a5b4fc; }
+    .eq-var { color: #7dd3fc; }
+    .eq-pos { color: var(--emerald); }
+    .eq-neg { color: var(--rose); }
+
+    /* ---------- Table ---------- */
+    .table-responsive {
+      overflow-x: auto; border-radius: var(--radius-md);
+      border: 1px solid var(--border); background: rgba(7, 12, 22, .35);
+    }
+    table.data-table thead { background: rgba(23, 35, 58, .75); }
+    table.data-table th { font-weight: 700; font-size: 11.5px; letter-spacing: .06em; white-space: nowrap; }
+    table.data-table td { color: #c7d3e7; }
+    table.data-table tbody tr { transition: background .15s; }
+    table.data-table tbody tr:hover { background: rgba(91, 124, 250, .08); }
+
+    /* ---------- Inputs / prediction ---------- */
+    .input-label-row { gap: 10px; color: #c7d3e7; }
+    .input-field {
+      background: rgba(6, 11, 20, .7); padding: 11px 14px;
+      border-radius: var(--radius-md); transition: all .15s;
+    }
+    .input-field:focus {
+      border-color: var(--primary-light);
+      box-shadow: 0 0 0 3px rgba(91,124,250,.20);
+      background: rgba(9, 15, 27, .85);
+    }
+    .range-slider { margin-top: 8px; cursor: pointer; }
+    .prediction-output-box {
+      margin-top: 18px; padding: 32px; border-radius: var(--radius-lg);
+      border: 1px solid rgba(139,163,255,.24);
+      background:
+        radial-gradient(340px 180px at 88% 0%, rgba(45,212,191,.26), transparent 66%),
+        radial-gradient(300px 200px at 8% 100%, rgba(91,124,250,.18), transparent 65%),
+        linear-gradient(145deg, #132048 0%, #0a1326 100%);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.05), var(--shadow-md);
+    }
+    .pred-label { font-size: 12px; font-weight: 600; letter-spacing: .14em; color: #9fb0d4; }
+    .pred-value { font-size: 38px; color: var(--emerald); text-shadow: 0 0 30px rgba(45,212,191,.4); }
+    .pred-formula-note { line-height: 1.6; }
+    .status-dot { width: 7px; height: 7px; }
+
+    /* ---------- Footer ---------- */
+    footer {
+      position: relative; z-index: 1; margin-top: 56px;
+      background: rgba(6, 10, 19, .72);
+      border-top: 1px solid var(--border-soft); padding: 40px 0;
+    }
+    .ack-card {
+      background: rgba(17, 26, 44, .7); border: 1px solid var(--border);
+      border-radius: var(--radius-md); padding: 16px 20px; margin-top: 14px; line-height: 1.75;
+    }
+    .ack-card a { color: var(--primary-light); }
+
+    @media (max-width: 768px) {
+      .brand-logo { width: 42px; height: 42px; border-radius: 13px; font-size: 17px; }
+      .brand-text h1 { font-size: 15.5px; }
+      .brand-sub { font-size: 9.5px; letter-spacing: .12em; }
+      .header-chip { font-size: 11px; padding: 6px 10px; }
+      .hero-card { padding: 26px 24px; }
+      .hero-card h2 { font-size: 24px; }
+      .hero-card p { font-size: 14px; }
+      .pred-value { font-size: 31px; }
+    }
+    @media (max-width: 520px) {
+      .container { padding: 20px 14px 56px; }
+      .header-inner { padding: 12px 14px; }
+      .header-actions { display: none; }
+    }
   </style>
 </head>
 <body>
 
   <header class="top-header">
     <div class="header-inner">
-      <div>
-        <div class="breadcrumbs">
-          <a href="#"><i class="fa-solid fa-house"></i> Home</a>
-          <i class="fa-solid fa-chevron-right" style="font-size:10px;"></i>
-          <a href="#">Regression Analysis</a>
-          <i class="fa-solid fa-chevron-right" style="font-size:10px;"></i>
-          <span style="color:#cbd6e8;font-weight:600;">50 Startups Feature Selection</span>
+      <div class="brand">
+        <div class="brand-logo"><i class="fa-solid fa-chart-line"></i></div>
+        <div class="brand-text">
+          <h1>50 Startups 多元線性迴歸與特徵選擇探索器</h1>
+          <span class="brand-sub">Multiple Linear Regression · Feature Selection Explorer</span>
         </div>
-        <div class="header-title-group">
-          <h1>
-            <i class="fa-solid fa-chart-line" style="color:var(--primary-light);"></i>
-            50 Startups 多元線性迴歸與特徵選擇探索器
-            <span class="brand-badge">CRISP-DM</span>
-          </h1>
-        </div>
+      </div>
+      <div class="header-actions">
+        <span class="header-chip accent"><i class="fa-solid fa-circle-check"></i> CRISP-DM</span>
+        <span class="header-chip"><i class="fa-solid fa-database"></i> 50 Startups</span>
+        <span class="header-chip"><i class="fa-solid fa-layer-group"></i> 5 種方法</span>
       </div>
     </div>
   </header>
@@ -285,6 +660,7 @@
   <div class="container">
 
     <div class="hero-card">
+      <span class="hero-eyebrow"><i class="fa-solid fa-wand-magic-sparkles"></i> Feature Selection Studio</span>
       <h2>特徵選擇與精簡模型分析</h2>
       <p>
         比較 5 種特徵選擇方法（<strong>Forward Selection</strong>、<strong>Backward Elimination</strong>、
@@ -295,7 +671,7 @@
       <div class="hero-tags">
         <span class="hero-pill"><i class="fa-solid fa-database"></i> 50 Startups Dataset</span>
         <span class="hero-pill"><i class="fa-solid fa-bolt"></i> 5 種特徵選擇方法</span>
-        <span class="hero-pill"><i class="fa-solid fa-star" style="color:#34d399;"></i> 全域甜蜜點：<span id="heroBest">k=1</span></span>
+        <span class="hero-pill"><i class="fa-solid fa-star" style="color:var(--emerald);"></i> 全域甜蜜點：<span id="heroBest">k=1</span></span>
         <span class="hero-pill"><i class="fa-solid fa-triangle-exclamation" style="color:#fbbf24;"></i> 過擬合警示：全模型 k=5</span>
       </div>
     </div>
@@ -308,7 +684,7 @@
         <button class="tab-btn" data-algo="Lasso (L1)"><i class="fa-solid fa-filter"></i> Lasso (L1) <span class="badge-pill">Ranking</span></button>
         <button class="tab-btn" data-algo="RF Importance"><i class="fa-solid fa-tree"></i> RF Importance <span class="badge-pill">Ensemble</span></button>
         <button class="tab-btn" data-algo="Mutual Information"><i class="fa-solid fa-diagram-project"></i> Mutual Information <span class="badge-pill">Filter</span></button>
-        <button class="tab-btn" data-algo="ALL" style="border-left:2px solid var(--primary-light);"><i class="fa-solid fa-layer-group"></i> 🌟 比較全部 5 種方法</button>
+        <button class="tab-btn tab-all" data-algo="ALL"><i class="fa-solid fa-layer-group"></i> 🌟 比較全部 5 種方法</button>
       </div>
 
       <span class="control-label" style="margin-top:12px;"><i class="fa-solid fa-list-ol"></i> 2. 特徵數量（k = 1 到 5）</span>
@@ -349,14 +725,14 @@
       </div>
     </div>
 
-    <div style="background:linear-gradient(180deg,var(--surface),var(--bg-soft));border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 20px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
-      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-        <span style="font-size:13px;font-weight:700;color:#cbd6e8;">
-          <i class="fa-solid fa-check-double" style="color:var(--primary-light);"></i> 目前選用特徵（<span id="featuresCount">1</span>）：
+    <div class="feature-strip">
+      <div class="feature-strip-left">
+        <span class="feature-strip-label">
+          <i class="fa-solid fa-check-double"></i> 目前選用特徵（<span id="featuresCount">1</span>）
         </span>
-        <div id="featuresListChips" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+        <div id="featuresListChips" class="feature-chips"></div>
       </div>
-      <div id="parsimonyNotice" class="badge-tag badge-green" style="font-size:12px;padding:4px 10px;"></div>
+      <div id="parsimonyNotice" class="badge-tag badge-green"></div>
     </div>
 
     <div class="dual-charts-grid">
@@ -478,24 +854,6 @@
 
   </div>
 
-  <footer>
-    <div class="footer-inner">
-      <div style="max-width:650px;">
-        <h4 style="font-size:16px;margin-bottom:8px;color:#eef3ff;"><i class="fa-solid fa-building-columns"></i> 50 Startups CRISP-DM 機器學習專題</h4>
-        <p style="line-height:1.6;font-size:13px;">
-          用於多元線性迴歸模型選擇、精簡性（parsimony）驗證與統計推論。以純 HTML、CSS、JavaScript 與 Chart.js 建構。
-        </p>
-      </div>
-      <div style="max-width:550px;">
-        <h4 style="font-size:14px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-dim);margin-bottom:8px;">參考與致謝</h4>
-        <div class="ack-card">
-          <strong>資料集：</strong>50 Startups（R&amp;D Spend、Administration、Marketing Spend、State、Profit）。<br>
-          <strong>方法：</strong>CRISP-DM；線性模型以 <code>statsmodels</code> OLS 估計，特徵選擇以 <code>scikit-learn</code> 執行。
-        </div>
-      </div>
-    </div>
-  </footer>
-
   <script>
     const SCHEMES = ['Forward Selection', 'Backward Elimination', 'Lasso (L1)', 'RF Importance', 'Mutual Information'];
     const ALGO_COLORS = {
@@ -503,7 +861,7 @@
       'Backward Elimination': '#fb923c',
       'Lasso (L1)': '#f87171',
       'RF Importance': '#c084fc',
-      'Mutual Information': '#34d399'
+      'Mutual Information': '#2dd4bf'
     };
 
     let currentAlgo = 'Forward Selection';
@@ -699,7 +1057,7 @@
           <td>Startup #${o.index}</td>
           <td style="font-family:'Fira Code',monospace;">${numFmt(o.actual)}</td>
           <td style="font-family:'Fira Code',monospace;">${numFmt(o.predicted)}</td>
-          <td style="color:${o.residual >= 0 ? '#34d399' : '#fb7185'};font-weight:600;">${o.residual >= 0 ? '+' : '−'}${numFmt(Math.abs(o.residual))}</td>
+          <td style="color:${o.residual >= 0 ? '#2dd4bf' : '#fb7185'};font-weight:600;">${o.residual >= 0 ? '+' : '−'}${numFmt(Math.abs(o.residual))}</td>
           <td>${numFmt(o.abs_error)}</td>
           <td>${o.pct_error.toFixed(2)}%</td>
           <td>${status}</td>`;
@@ -819,7 +1177,7 @@
         const color = ALGO_COLORS[algo] || '#6366f1';
         const bestK = schemeBestK(algo);
         const radii = data.map(d => d.k === currentK ? 7 : (d.k === bestK ? 6 : 4));
-        const colors = data.map(d => d.k === bestK ? '#34d399' : color);
+        const colors = data.map(d => d.k === bestK ? '#2dd4bf' : color);
 
         const base = {
           label: algo,
